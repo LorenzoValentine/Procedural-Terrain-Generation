@@ -2,6 +2,10 @@
 
 This is the extended version of the paper "Designer Worlds: Procedural Generation of Infinite Terrain from Real-World Elevation Data" by Ian Parberry. The original paper can be found [here](http://larc.unt.edu/ian/research/valuenoise/).
 
+The purpose of this extended version is to enhance the efficiency of the original paper's method of generating terrain from real-world elevation data. The original paper describes a method to generate terrain from real-world elevation data using value noise. The method involves downloading elevation data from the United States Geographical Service, analyzing the data, and generating terrain based on the data.
+
+We doing this enhancement by according to the knowledge we have gained from the Course COMP4610 from ANU (Australian National University) in 2024 Semester 1.
+
 We, the authors of this extended version, have made the following changes to the original paper:
 
 We acknowledge that the original paper was published under the GNU All-Permissive License, and we have made sure to follow the same license for this extended version.
