@@ -6,9 +6,25 @@ The purpose of this extended version is to enhance the efficiency of the origina
 
 We doing this enhancement by according to the knowledge we have gained from the Course COMP4610 from ANU (Australian National University) in 2024 Semester 1.
 
-We, the authors of this extended version, have made the following changes to the original paper:
+We, the authors of this extended version, have made the following changes to the original repository:
+
+1. Code Frame Update:
+    - Updated the code to Visual Studio 2022 and C++20 from Visual Studio 2012.
+
+2. Code Optimization:
+
+
 
 We acknowledge that the original paper was published under the GNU All-Permissive License, and we have made sure to follow the same license for this extended version.
+
+To correctly use the code in this repository, please follow the instructions below:
+
+Please note that the original repository use the Visual Studio 2012 Solution and C++ source code. We have updated the code to Visual Studio 2022 and C++20. The code must be compiled and executed in Visual Studio 2022(MSVC), with a windows operating system. The code may not work on other operating systems or compilers.
+
+1. Compulsory Software:
+    - Windows Operating System
+    - Visual Studio 2022 with C++ Desktop Development
+    - GIS Software to open .ais file [QGIS(free, recommend), ArcGIS, etc.]
 
 ## Here is the original readme file from the repository
 
