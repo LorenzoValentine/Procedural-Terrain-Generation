@@ -36,20 +36,20 @@ struct FeatureInfo {
 /// The Designer World generator makes 2D noise suitable for terrain height maps.
 /// It combines Value Noise with a height distribution.
 
-class CDesignerWorld{
-  private:
+class CDesignerWorld {
+private:
     static const int SIZE = 256; ///< Size of height table;
     static const int MASK = 0xFF; ///< Mask for height table indices.
 
     float m_fPosition[SIZE]; ///< Value table.
     int m_nPermute[SIZE]; ///< Permutation table. Holds a random permutation.
     void InitSampleTable(float scale); /// Fill sample table.
-    float noise(float x, float z); ///< Noise generator.  
+    float noise(float x, float z); ///< Noise generator.
     std::vector<FeatureInfo> m_features; ///< Features.
 
-  public:
+public:
     void Initialize(); ///< Initialize.
-    float GetHeight(float x, float z, float a, float b, int n); ///< Get height.
+    float GetHeight(float x, float z, float baseFrequency, float lacunarity, int numOctaves); ///< Get height.
     void SetValueTable(int table[], const int n); //< Set value table.
 
     void AddFeature(FeatureType type, float centerX, float centerZ, float radius, float height); ///< Add feature.
