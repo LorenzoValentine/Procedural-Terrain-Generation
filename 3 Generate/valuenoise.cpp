@@ -69,18 +69,20 @@ void CDesignerWorld::SetValueTable(int table[], const int n){
 /// \param n Number of octaves
 /// \return Height value between 0.0 and 1.0
 
-float CDesignerWorld::GetHeight(float x, float z, float a, float b, int n){
-  float result = 0.0f; //resulting height
-  float scale = 1.0f; //scale of next octave
-  
-  for(int i=0; i<n; i++){ //for each octave 
-    result += scale * noise(x, z);
-    scale *= a; //scale down amplitude of next octave
-    x *= b; z *= b; //scale down wavelength of next octave
-  } //for
+float CDesignerWorld::GetHeight(float x, float z, float a, float b, int n) {
+    float baseHeight = 0.0f; // 初始基本高度为0
 
-  return (1.0f + result * 1.414213f * (a - 1.0f)/(scale - 1.0f))/2.0f; //scale to [0.0, 1.0]
-} //GetHeight
+    float scale = 1.0f; // 缩放因子
+    for (int i = 0; i < n; i++) { // 对每个倍频程序
+        baseHeight += scale * noise(x, z);
+        scale *= a; // 调整下一个倍频程序的振幅
+        x *= b; z *= b; // 调整下一个倍频程序的波长
+    }
+
+    baseHeight = (1.0f + baseHeight * 1.414213f * (a - 1.0f) / (scale - 1.0f)) / 2.0f; // 将基本高度缩放到[0.0, 1.0]范围内
+
+    return ApplyFeatures(x, z, baseHeight); // 应用地形特征
+}
 
 /// Get random height value for a single octave at a point in the terrain.
 /// This is Value Noise. If you understand Perlin Noise, then this code will
@@ -108,3 +110,34 @@ float CDesignerWorld::noise(float x, float z){
 
   return lerp(sz, v0, v1);
 } //noise
+
+void CDesignerWorld::AddFeature(FeatureType type, float centerX, float centerZ, float radius, float height) {
+    FeatureInfo info = { type, centerX, centerZ, radius, height };
+    m_features.push_back(info);
+}
+
+float CDesignerWorld::ApplyFeatures(float x, float z, float baseHeight) {
+    float height = baseHeight;
+    for (const FeatureInfo& info : m_features) {
+        float dx = x - info.centerX;
+        float dz = z - info.centerZ;
+        float distance = sqrtf(dx * dx + dz * dz);
+        if (distance <= info.radius) {
+            switch (info.type) {
+            case FLAT_AREA:
+                height = info.height;
+                break;
+            case MOUNTAIN_RANGE:
+                height = std::max(height, info.height);
+                break;
+            case VALLEY:
+                height = std::min(height, info.height);
+                break;
+            case CANYON:
+                height = info.height;
+                break;
+            }
+        }
+    }
+    return height;
+}

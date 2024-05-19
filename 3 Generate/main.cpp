@@ -44,13 +44,20 @@ void printDEMfileHeader(FILE* output){
 
 int main(int argc, char *argv[]){ 
   //initialize the random number generator
-  int seed = timeGetTime();
+  // int seed = timeGetTime();
+  int seed = 8124078;
   srand(seed);
   printf("Pseudorandom number seed = %d\n", seed);
 
   //set up designer world
   g_cDesignerWorld.Initialize();
   g_cDesignerWorld.SetValueTable(g_nUtahDistribution, POINTCOUNT);
+
+  // add some features
+  g_cDesignerWorld.AddFeature(FLAT_AREA, 0.5f, 0.5f, 0.2f, 0.1f); // 添加一片平地
+  g_cDesignerWorld.AddFeature(MOUNTAIN_RANGE, 0.7f, 0.3f, 0.1f, 0.9f); // 添加一个山脉
+  g_cDesignerWorld.AddFeature(VALLEY, 0.2f, 0.8f, 0.15f, 0.3f); // 添加一个山谷
+  g_cDesignerWorld.AddFeature(CANYON, 0.8f, 0.6f, 0.05f, 0.1f); // 添加一个峡谷
 
   //start the DEM file
   char filename[MAX_PATH];
