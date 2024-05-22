@@ -10,25 +10,17 @@
 //provided the copyright notice and this notice are preserved.
 //This file is offered as-is, without any warranty.
 
-#include <stdlib.h>
-#include <stdio.h>
-
+#include <algorithm>
+#include <random>
 #include "valuenoise.h"
+#include <numeric>
 
 /// Initialize the permutation table.
 
-void CDesignerWorld::Initialize(){
-  //start with identity permutation
-  for(int i=0; i<SIZE; i++)
-    m_nPermute[i] = i;
-
-  //randomize 
-  for(int i=SIZE-1; i>0; i--){
-    int j = rand() % (i + 1); //note the fix to Perlin's original code
-    int temp = m_nPermute[i];
-    m_nPermute[i] = m_nPermute[j];
-    m_nPermute[j] = temp;
-  } //for
+void CDesignerWorld::InitializePermutationTable()
+{
+  std::iota(m_permutationTable.begin(), m_permutationTable.end(), 0);
+  std::ranges::shuffle(m_permutationTable, m_gen);
 } //Initialize
 
 /// Set the value table.
@@ -36,29 +28,29 @@ void CDesignerWorld::Initialize(){
 /// \param n Size of table.
 
 void CDesignerWorld::SetValueTable(int table[], const int n){
-  //check that the values add up to 256
-  int sum = 0;
-  for(int i=0; i<n; i++)
-    sum += table[i];
+  int sum = std::accumulate(table, table + n, 0);
   if(sum != SIZE){
     printf("Height distribution values must sum to %d, not %d\n", SIZE, sum);
-    return; //fail and bail
-  } //if
+    return;
+  }
 
-  //fill the table
-  float delta = 2.0f/(float)(n-1); //interval size
-  float min = -1.0f; //lower limit if interval
-  int k = 0; //fill in m_fPosition[k]
+  float delta = 2.0f / static_cast<float>(n - 1);
+  float min = -1.0f;
+  int k = 0;
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0, 1);
+
   for(int i=0; i<n-1; i++){
     for(int j=0; j<table[i]; j++)
-      m_fPosition[k++] = min + delta * (float)rand()/(float)RAND_MAX;
+      m_heightValues[k++] = min + delta * dis(gen);
     min += delta;
-  } //for
+  }
 
-  //missed the largest values, get them now
   for(int j=0; j<table[n-1]; j++)
-    m_fPosition[k++] = 1.0f;
-} //SetValueTable
+    m_heightValues[k++] = 1.0f;
+}
 
 /// Get random height value at a point in the terrain.
 /// Computes 1/f noise using the sample table.
@@ -70,16 +62,18 @@ void CDesignerWorld::SetValueTable(int table[], const int n){
 /// \return Height value between 0.0 and 1.0
 
 float CDesignerWorld::GetHeight(float x, float z, float a, float b, int n){
-  float result = 0.0f; //resulting height
-  float scale = 1.0f; //scale of next octave
-  
-  for(int i=0; i<n; i++){ //for each octave 
-    result += scale * noise(x, z);
-    scale *= a; //scale down amplitude of next octave
-    x *= b; z *= b; //scale down wavelength of next octave
-  } //for
+  float result = 0.0f;
+  float scale = 1.0f;
 
-  return (1.0f + result * 1.414213f * (a - 1.0f)/(scale - 1.0f))/2.0f; //scale to [0.0, 1.0]
+  for (int i = 0; i < n; i++)
+  {
+    result += scale * noise(x, z);
+    scale *= a;
+    x *= b;
+    z *= b;
+  }
+
+  return (1.0f + result * 1.414213f * (a - 1.0f) / (scale - 1.0f)) / 2.0f;
 } //GetHeight
 
 /// Get random height value for a single octave at a point in the terrain.
@@ -90,21 +84,21 @@ float CDesignerWorld::GetHeight(float x, float z, float a, float b, int n){
 /// \param z Z coordinate of point at which to sample
 /// \return Height value between -1.0 and 1.0
 
-float CDesignerWorld::noise(float x, float z){
-  const int dx = (int)x;
-  const float sx = s_curve(x - dx);
-  const int i = m_nPermute[MASK & dx];
-  const int j = m_nPermute[MASK & (dx + 1)];
+float CDesignerWorld::noise(float x, float z) const {
+  const int dx = static_cast<int>(x);
+  const float sx = S_CURVE(x - dx);
+  const int i = m_permutationTable[MASK & dx];
+  const int j = m_permutationTable[MASK & (dx + 1)];
 
-  const int dz = (int)z;
-  const float sz = s_curve(z - dz);
+  const int dz = static_cast<int>(z);
+  const float sz = S_CURVE(z - dz);
 
-  float u0 = m_fPosition[m_nPermute[(i + dz) & MASK]];
-  float u1 = m_fPosition[m_nPermute[(j + dz) & MASK]];
-  const float v0 = lerp(sx, u0, u1);
-  u0 = m_fPosition[m_nPermute[(i + dz + 1) & MASK]];
-  u1 = m_fPosition[m_nPermute[(j + dz + 1) & MASK]];
-  const float v1 = lerp(sx, u0, u1);
+  float u0 = m_heightValues[m_permutationTable[(i + dz) & MASK]];
+  float u1 = m_heightValues[m_permutationTable[(j + dz) & MASK]];
+  const float v0 = LERP(sx, u0, u1);
+  u0 = m_heightValues[m_permutationTable[(i + dz + 1) & MASK]];
+  u1 = m_heightValues[m_permutationTable[(j + dz + 1) & MASK]];
+  const float v1 = LERP(sx, u0, u1);
 
-  return lerp(sz, v0, v1);
+  return LERP(sz, v0, v1);
 } //noise

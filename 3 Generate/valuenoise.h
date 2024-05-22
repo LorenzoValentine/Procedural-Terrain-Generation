@@ -12,8 +12,9 @@
 
 #pragma once
 
-#define s_curve(t)  ((t)*(t)*(3.0f - 2.0f*(t)))
-#define lerp(t, a, b) (a + (t)*(b - a))
+#define S_CURVE(t)  ((t)*(t)*(3.0f - 2.0f*(t)))
+#define LERP(t, a, b) (a + (t)*(b - a))
+#include <array>
 
 /// \brief Designer World generator.
 ///
@@ -21,17 +22,24 @@
 /// It combines Value Noise with a height distribution.
 
 class CDesignerWorld{
-  private:
-    static const int SIZE = 256; ///< Size of height table;
-    static const int MASK = 0xFF; ///< Mask for height table indices.
+  static constexpr int SIZE = 256; ///< Size of height table;
+  static constexpr int MASK = 0xFF; ///< Mask for height table indices.
 
-    float m_fPosition[SIZE]; ///< Value table.
-    int m_nPermute[SIZE]; ///< Permutation table. Holds a random permutation.
-    void InitSampleTable(float scale); /// Fill sample table.
-    float noise(float x, float z); ///< Noise generator.  
+  std::array<float, SIZE> m_heightValues; ///< Value table.
+  std::array<int, SIZE> m_permutationTable; ///< Permutation table. Holds a random permutation.
+  std::random_device m_rd; /// Fill sample table.
+  std::mt19937 m_gen; ///< Noise generator.
 
-  public:
-    void Initialize(); ///< Initialize.
-    float GetHeight(float x, float z, float a, float b, int n); ///< Get height.
-    void SetValueTable(int table[], const int n); //< Set value table.
+  // void InitSampleTable(float scale);
+  float noise(float x, float z) const;
+
+public:
+  CDesignerWorld() : m_gen(m_rd())
+  {
+    InitializePermutationTable();
+  }
+
+  void InitializePermutationTable(); ///< Initialize.
+  void SetValueTable(int table[], int n); //< Set value table.
+  float GetHeight(float x, float z, float a, float b, int n); ///< Get height.
 }; //CDesignerWorld

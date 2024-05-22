@@ -9,74 +9,96 @@
 //provided the copyright notice and this notice are preserved.
 //This file is offered as-is, without any warranty.
 
-#include <windows.h>
-#include <MMSystem.h>
-#include <stdio.h>
-#include <conio.h>
+#include <chrono>
+#include <filesystem>
+#include <fstream>
+#include <format>
+#include <random>
+#include <array>
+#include <iostream>
 
 #include "valuenoise.h"
 
-const int CELLSIZE = 4000; //width of square grid
-const int NUMOCTAVES = 8; //number of octaves of 1/f noise
-const int ALTITUDE = 4000; //altitude scale value
+constexpr int CELLSIZE = 4000; //width of square grid
+constexpr int NUMOCTAVES = 8; //number of octaves of 1/f noise
+constexpr int ALTITUDE = 4000; //altitude scale value
 
 CDesignerWorld g_cDesignerWorld;
 
 //Height distribution data.
-const int POINTCOUNT = 31;
-int g_nUtahDistribution[POINTCOUNT] = {
+constexpr int POINTCOUNT = 31;
+std::array<int, POINTCOUNT> g_nUtahDistribution = {
   1, 4, 6, 7, 7, 8, 10, 11, 14, 30, 37, 30, 19, 11, 8, 5, 5, 4, 3, 3, 3, 3, 3, 3, 5, 4, 4, 3, 2, 2, 1
 };
 
 /// Print the header for a DEM file.
 /// \param output Output file handle.
 
-void printDEMfileHeader(FILE* output){
-  if(output == NULL)return; //bail and fail
+void printDEMfileHeader(std::ofstream& output)
+{
+  if (!output) return; //bail and fail
 
-  fprintf(output, "nrows %d\n", CELLSIZE);
-  fprintf(output, "ncols %d\n", CELLSIZE);
-  fprintf(output, "xllcenter %0.6f\n", 0.0f);
-  fprintf(output, "yllcenter %0.6f\n", 0.0f);
-  fprintf(output, "cellsize 5.000000\n");
-  fprintf(output, "NODATA_value  -9999\n");
+  output << std::format("nrows {}\n", CELLSIZE);
+  output << std::format("ncols {}\n", CELLSIZE);
+  output << std::format("xllcenter {:0.6f}\n", 0.0f);
+  output << std::format("yllcenter {:0.6f}\n", 0.0f);
+  output << "cellsize 5.000000\n";
+  output << "NODATA_value  -9999\n";
 } //printDEMfileHeader
 
-int main(int argc, char *argv[]){ 
+void printProgressBar(int step, int total, int barWidth, int& curProg);
+
+int main(int argc, char* argv[])
+{
   //initialize the random number generator
-  int seed = timeGetTime();
-  srand(seed);
-  printf("Pseudorandom number seed = %d\n", seed);
+  auto seed = std::chrono::system_clock::now().time_since_epoch().count();
+  std::default_random_engine generator(seed);
+  std::uniform_real_distribution<float> distribution(0.0, 1.0);
+  std::cout << std::format("Pseudorandom number seed = {}\n", seed);
 
   //set up designer world
-  g_cDesignerWorld.Initialize();
-  g_cDesignerWorld.SetValueTable(g_nUtahDistribution, POINTCOUNT);
+  g_cDesignerWorld.InitializePermutationTable();
+  g_cDesignerWorld.SetValueTable(g_nUtahDistribution.data(), POINTCOUNT);
 
   //start the DEM file
-  char filename[MAX_PATH];
-  sprintf_s(filename, "%d.asc", seed);
-  FILE* output;
-  fopen_s(&output, filename, "wt");
+  std::filesystem::path filename = std::format("{}.asc", seed);
+  std::ofstream output(filename);
   printDEMfileHeader(output);
 
   //get random origin
-  float x = (float)rand();
-  float z = (float)rand();
+  float x = distribution(generator);
+  float z = distribution(generator);
 
   //generate and save grid heights to DEM file
+  int curProg = 0;
   for(int i=0; i<CELLSIZE; i++){
     for(int j=0; j<CELLSIZE; j++)
-      fprintf(output, "%0.2f ", ALTITUDE *
-        g_cDesignerWorld.GetHeight(x + i/256.0f, z + j/256.0f, 0.5f, 2.0f, NUMOCTAVES));
-    fprintf(output, "\n");
-    if(i%100 == 0)printf(".");
+      output << std::format("{:0.2f} ", ALTITUDE *
+                            g_cDesignerWorld.GetHeight(x + i/256.0f, z + j/256.0f, 0.5f, 2.0f, NUMOCTAVES));
+    output << "\n";
+    // show the current progress
+    printProgressBar(i, CELLSIZE, 50, curProg);
   } //for
 
   //shut down and exit
-  printf("\n");
-  fclose(output);
+  std::cout << "\n";
+  output.close();
 
-  printf("Hit Almost Any Key to Exit...\n");
-  _getch();
+  std::cout << "Hit Almost Any Key to Exit...\n";
+  std::cin.get();
   return 0;
 } //main
+
+void printProgressBar(int step, int total, int barWidth, int& curProg) {
+  std::cout << "[";
+  int pos = barWidth * step / total;
+  if(pos == curProg) return;
+  for (int i = 0; i < barWidth; ++i) {
+    if (i < pos) std::cout << "=";
+    else if (i == pos) std::cout << ">";
+    else std::cout << " ";
+  }
+  std::cout << "] " << static_cast<int>(static_cast<float>(step) / static_cast<float>(total) * 100.0) << " %\r";
+  std::cout.flush();
+  curProg = pos;
+}
