@@ -63,7 +63,10 @@ int main(int argc, char *argv[])
 
     // set up designer world
     g_cDesignerWorld->initialize_permutation_table();
-    g_cDesignerWorld->set_value_table(g_nUtahDistribution.data(), POINTCOUNT);
+    if (dynamic_cast<ValueNoiseWorldGenerator*>(g_cDesignerWorld))
+    {
+        g_cDesignerWorld->set_value_table(g_nUtahDistribution.data(), POINTCOUNT);
+    }
 
     // start the DEM file
     std::filesystem::path filename = std::format("{}.asc", seed);

@@ -23,7 +23,7 @@ public:
     float get_height(float x, float z) const override;
 
 private:
-    static float grad(int hash, float x, float y)
+    static inline float grad(int hash, float x, float y)
     {
         int h = hash & 7;
         float u = h < 4 ? x : y;
@@ -31,13 +31,8 @@ private:
         return ((h & 1) ? -u : u) + ((h & 2) ? -2.0 * v : 2.0 * v);
     }
 
-    static float fade(float t)
+    static inline float fade(float t)
     {
         return t * t * t * (t * (t * 6 - 15) + 10);
-    }
-
-    static float lerp(float a, float b, float t)
-    {
-        return (1 - t) * a + t * b;
     }
 };

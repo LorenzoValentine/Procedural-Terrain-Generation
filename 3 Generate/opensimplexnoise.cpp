@@ -7,27 +7,25 @@ float OpenSimplexNoiseWorldGenerator::get_noise(float x, float z) const
     int zi = std::floor(z);
 
     // Compute the fractional part
-    double xf = x - xi;
-    double zf = z - zi;
+    float xf = x - xi;
+    float zf = z - zi;
 
     // Compute the gradients
-    double grad00 = grad(m_permutationTable[(m_permutationTable[xi & 255] + zi) & 255], xf, zf);
-    double grad01 = grad(m_permutationTable[(m_permutationTable[xi & 255] + (zi + 1)) & 255], xf, zf - 1);
-    double grad10 = grad(m_permutationTable[(m_permutationTable[(xi + 1) & 255] + zi) & 255], xf - 1, zf);
-    double grad11 = grad(m_permutationTable[(m_permutationTable[(xi + 1) & 255] + (zi + 1)) & 255], xf - 1, zf - 1);
+    float grad00 = grad(m_permutationTable[(m_permutationTable[xi & 255] + zi) & 255], xf, zf);
+    float grad01 = grad(m_permutationTable[(m_permutationTable[xi & 255] + (zi + 1)) & 255], xf, zf - 1);
+    float grad10 = grad(m_permutationTable[(m_permutationTable[(xi + 1) & 255] + zi) & 255], xf - 1, zf);
+    float grad11 = grad(m_permutationTable[(m_permutationTable[(xi + 1) & 255] + (zi + 1)) & 255], xf - 1, zf - 1);
 
     // Compute the fade curves
-    double u = fade(xf);
-    double v = fade(zf);
+    float u = fade(xf);
+    float v = fade(zf);
 
     // Interpolate along x
-    double interpX0 = lerp(grad00, grad10, u);
-    double interpX1 = lerp(grad01, grad11, u);
+    float interpX0 = LERP(u, grad00, grad10);
+    float interpX1 = LERP(u, grad01, grad11);
 
     // Interpolate along y
-    double interpY = lerp(interpX0, interpX1, v);
-    // the range of the noise is -1 to 1, so we need to scale it to 0 to 1 so the code is consistent with the ValueNoiseWorldGenerator
-    return (interpY + 1) / 2;
+    return LERP(v, interpX0, interpX1);
 }
 
 float OpenSimplexNoiseWorldGenerator::get_height(float x, float z) const
