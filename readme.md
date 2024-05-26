@@ -63,6 +63,12 @@ Make sure you have the following installed:
     ```
 
 2. Install C++20 compiler by running the following command in windows terminal by using Scoop package manager:
+   
+   First, you need to add the bucket for the LLVM compiler by running the following command:
+    ```bash
+    scoop bucket add versions
+    ```
+    Then, you can install the LLVM compiler by running the following command:
 
     ```bash
     scoop install mingw-winlibs-llvm-ucrt
