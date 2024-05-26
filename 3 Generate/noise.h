@@ -9,7 +9,6 @@ class NoiseGenerator
 {
 public:
     virtual float get_height(float x, float z) const = 0; // Get height for a point in the terrain.
-    NoiseGenerator() : m_gen(m_rd()) { initialize_permutation_table(); }
     NoiseGenerator(int numOctaves, float frequency, float lacunarity)
         : num_octaves(numOctaves), frequency(frequency), lacunarity(lacunarity),
           m_gen(m_rd())

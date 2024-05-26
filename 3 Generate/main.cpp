@@ -18,6 +18,7 @@
 #include <random>
 
 #include "valuenoise.h"
+#include "opensimplexnoise.h"
 
 constexpr int CELLSIZE = 4000; // width of square grid
 constexpr int NUMOCTAVES = 8;  // What is
@@ -48,10 +49,11 @@ void printProgressBar(int step, int total, int bar_width = 50);
 
 int main(int argc, char *argv[])
 {
-    NoiseGenerator *g_cDesignerWorld = new ValueNoiseWorldGenerator(NUMOCTAVES, 0.5f, 2.0f); // Designer world object
+    NoiseGenerator *g_cDesignerWorld = new OpenSimplexNoiseWorldGenerator(NUMOCTAVES, 0.5f, 2.0f); // Designer world object
     // initialize the random number generator
     auto seed = std::random_device{}(); // use hardware entropy if available
     // avoid using time as seed
+    // auto seed = 8124078;
     std::default_random_engine generator(seed);
     std::uniform_real_distribution<float> distribution(0.0, 1.0);
     std::cout << std::format("Pseudorandom number seed = {}\n", seed);

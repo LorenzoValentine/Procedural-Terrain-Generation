@@ -1,15 +1,9 @@
 add_rules("mode.debug", "mode.release")
 
-target("valuenoise")
-    set_kind("static")
-    add_files("valuenoise.cpp")
-    set_languages("cxx20")
-
 target("noise")
     set_kind("static")
-    add_files("noise.cpp")
+    add_files("noise.cpp", "valuenoise.cpp", "opensimplexnoise.cpp")
     set_languages("cxx20")
-    add_deps("valuenoise")
 
 target("main")
     set_kind("binary")

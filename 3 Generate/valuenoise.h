@@ -16,7 +16,7 @@
 
 #include "noise.h"
 
-/// \brief Designer World generator.
+/// \brief Designer World generator using Value Noise.
 ///
 /// The Designer World generator makes 2D noise suitable for terrain height
 /// maps. It combines Value Noise with a height distribution.
@@ -29,7 +29,7 @@ class ValueNoiseWorldGenerator : public NoiseGenerator
     float get_noise(float x, float z) const override;
 
 public:
-    ValueNoiseWorldGenerator(int numOctaves, float frequency, float lacunarity)
+    explicit ValueNoiseWorldGenerator(int numOctaves, float frequency, float lacunarity)
         : NoiseGenerator(numOctaves, frequency, lacunarity)
     {
         initialize_permutation_table();
