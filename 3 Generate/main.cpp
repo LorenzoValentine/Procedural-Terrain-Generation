@@ -17,8 +17,8 @@
 #include <iostream>
 #include <random>
 
-#include "valuenoise.h"
 #include "opensimplexnoise.h"
+#include "valuenoise.h"
 
 constexpr int CELLSIZE = 4000; // width of square grid
 constexpr int NUMOCTAVES = 8;  // What is
@@ -49,6 +49,9 @@ void printProgressBar(int step, int total, int bar_width = 50);
 
 int main(int argc, char *argv[])
 {
+    std::ios_base::sync_with_stdio(false);
+    // create a Timer
+    auto start = std::chrono::high_resolution_clock::now();
     NoiseGenerator *g_cDesignerWorld = new OpenSimplexNoiseWorldGenerator(NUMOCTAVES, 0.5f, 2.0f); // Designer world object
     // initialize the random number generator
     auto seed = std::random_device{}(); // use hardware entropy if available
@@ -88,6 +91,11 @@ int main(int argc, char *argv[])
     std::cout << "\n";
     output.close();
 
+    // timer stop
+    auto stop = std::chrono::high_resolution_clock::now();
+    // calculate the elapsed time, use xx.xxs format
+    std::chrono::duration<double> elapsed = stop - start;
+    std::cout << std::format("Elapsed time: {:.1f}s\n", elapsed.count());
     std::cout << "Hit Almost Any Key to Exit...\n";
     std::cin.get();
     return 0;
