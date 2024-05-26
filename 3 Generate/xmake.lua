@@ -5,11 +5,17 @@ target("valuenoise")
     add_files("valuenoise.cpp")
     set_languages("cxx20")
 
+target("noise")
+    set_kind("static")
+    add_files("noise.cpp")
+    set_languages("cxx20")
+    add_deps("valuenoise")
+
 target("main")
     set_kind("binary")
     add_files("main.cpp")
     set_languages("cxx20")
-    add_deps("valuenoise")
+    add_deps("noise")
 
 --
 -- If you want to known more usage about xmake, please see https://xmake.io

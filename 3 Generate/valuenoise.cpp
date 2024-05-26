@@ -26,21 +26,20 @@
 /// \param n Number of octaves
 /// \return Height value between 0.0 and 1.0
 
-float ValueNoiseWorldGenerator::get_height(float x, float z, float a, float b,
-                                           int n) const
+float ValueNoiseWorldGenerator::get_height(float x, float z) const
 {
     float result = 0.0f;
     float scale = 1.0f;
 
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < num_octaves; i++)
     {
         result += scale * get_noise(x, z);
-        scale *= a;
-        x *= b;
-        z *= b;
+        scale *= frequency;
+        x *= lacunarity;
+        z *= lacunarity;
     }
 
-    return (1.0f + result * 1.414213f * (a - 1.0f) / (scale - 1.0f)) / 2.0f;
+    return (1.0f + result * 1.414213f * (frequency - 1.0f) / (scale - 1.0f)) / 2.0f;
 } // get_height
 
 /// Get random height value for a single octave at a point in the terrain.
@@ -67,6 +66,5 @@ float ValueNoiseWorldGenerator::get_noise(float x, float z) const
     u0 = m_heightValues[m_permutationTable[(i + dz + 1) & MASK]];
     u1 = m_heightValues[m_permutationTable[(j + dz + 1) & MASK]];
     const float v1 = LERP(sx, u0, u1);
-
     return LERP(sz, v0, v1);
 } // noise

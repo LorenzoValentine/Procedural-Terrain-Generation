@@ -8,17 +8,24 @@
 class NoiseGenerator
 {
 public:
-    float get_height(float x,
-                     float z); // Get height for a point in the terrain.
+    virtual float get_height(float x, float z) const = 0; // Get height for a point in the terrain.
     NoiseGenerator() : m_gen(m_rd()) { initialize_permutation_table(); }
-    virtual ~NoiseGenerator() = default;
+    NoiseGenerator(int numOctaves, float frequency, float lacunarity)
+        : num_octaves(numOctaves), frequency(frequency), lacunarity(lacunarity),
+          m_gen(m_rd())
+    {
+        initialize_permutation_table();
+    }
+    ~NoiseGenerator() = default;
     void initialize_permutation_table();      ///< Initialize.
     void set_value_table(int table[], int n); //< Set value table,
 
-private:
-    static constexpr int SIZE = 256;  ///< Size of height table;
-    static constexpr int MASK = 0xFF; ///< Mask for height table indices.
-
+protected:
+    int num_octaves = 8;     ///< Number of octaves.
+    float frequency = 0.5f;  ///< Frequency.
+    float lacunarity = 2.0f; ///< Lacunarity.
+    static constexpr int SIZE = 256;        ///< Size of height table;
+    static constexpr int MASK = 0xFF;       ///< Mask for height table indices.
     std::array<float, SIZE> m_heightValues; ///< Value table.
     std::array<int, SIZE>
         m_permutationTable;  ///< Permutation table. Holds a random permutation.

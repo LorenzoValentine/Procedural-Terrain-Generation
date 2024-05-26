@@ -26,19 +26,13 @@ class ValueNoiseWorldGenerator : public NoiseGenerator
     static constexpr int SIZE = 256;  ///< Size of height table;
     static constexpr int MASK = 0xFF; ///< Mask for height table indices.
 
-    std::array<float, SIZE> m_heightValues; ///< Value table.
-    std::array<int, SIZE>
-        m_permutationTable;  ///< Permutation table. Holds a random permutation.
-    std::random_device m_rd; /// Fill sample table.
-    std::mt19937 m_gen;      ///< Noise generator.
-
     float get_noise(float x, float z) const override;
 
 public:
-    ValueNoiseWorldGenerator() : m_gen(m_rd())
+    ValueNoiseWorldGenerator(int numOctaves, float frequency, float lacunarity)
+        : NoiseGenerator(numOctaves, frequency, lacunarity)
     {
         initialize_permutation_table();
     }
-    float get_height(float x, float z, float a, float b,
-                     int n) const; ///< Get height.
+    float get_height(float x, float z) const override; ///< Get height.
 }; // ValueNoiseWorldGenerator

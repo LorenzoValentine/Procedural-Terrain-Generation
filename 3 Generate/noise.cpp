@@ -34,7 +34,7 @@ void NoiseGenerator::set_value_table(int table[], const int n)
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(0, 1);
+    std::uniform_real_distribution<> dis(0.0, 1.0);
 
     for (int i = 0; i < n - 1; i++)
     {
@@ -46,3 +46,4 @@ void NoiseGenerator::set_value_table(int table[], const int n)
     for (int j = 0; j < table[n - 1]; j++)
         m_heightValues[k++] = 1.0f;
 }
+
